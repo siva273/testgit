@@ -1,28 +1,26 @@
+from __future__ import unicode_literals
+
 from mogwai.models import Vertex, Edge
 
 
 class Data(Vertex):
-    no_of_vertex = 0
-
     def __init__(self, *args, **kwargs):
-        if len(*args) > 0:
+
+        if len(args) > 0:
             self.element_type = args[0]
         else:
-            self.element_type = "data"
+            self.element_type = 'data'
 
+        super(Vertex, self).__init__(**kwargs)
 
+    @classmethod
+    def create(cls, *args, **kwargs):
 
-        super(Data, self).__init__(self, **kwargs)
-        Data.no_of_vertex += 1
+        return super(Data, cls).create(*args, **kwargs)
 
 
 class Relation(Edge):
     def __init__(self, outV, inV, **kwargs):
-        for key, value in kwargs.items():
-            if key == 'element_type':
-                self.element_type = value
-            else:
-                self.element_type = "data"
         super(Relation, self).__init__(outV, inV, **kwargs)
 
 
@@ -32,16 +30,22 @@ class DataFactory:
 
     @classmethod
     def create(cls, *args, **kwargs):
+        flag_to_create = False
         for key, value in kwargs.items():
             if key == 'key':
                 results = Data.find_by_value(key, value, False)
                 if len(results) == 0:
-                    return Data.create(*args, **kwargs)
+                    flag_to_create = True
                 elif len(results) >= 1:
                     for v in results:
                         data1 = v
                         data1.delete()
-                    return Data.create(*args, **kwargs)
+                    flag_to_create = True
+        if flag_to_create:
+            return Data.create(*args, **kwargs)
+        else:
+            from diya.models import DiyaModelException
+            raise DiyaModelException("Failed to create vertex")
 
     @classmethod
     def delete(cls, *args, **kwargs):

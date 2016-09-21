@@ -1,2 +1,2 @@
-from .model import Data, DataFactory
+from .model import Data, DataFactory, Relation, RelationFactory
 from .exceptions import DiyaModelException
